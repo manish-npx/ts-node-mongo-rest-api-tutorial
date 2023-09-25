@@ -1,33 +1,42 @@
-import express from 'express';
+import express, { Application, Request, Response } from "express";
 import http from 'http';
+import "reflect-metadata";
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import cors from 'cors';
+import helmet from "helmet";
 
 import router from './router';
-import mongoose from 'mongoose';
+import connectDB from './config/db';
+import { errorHandler, notFound } from "./middlewares/ErrorMiddleware";
 
-const app = express();
+
+const app: Application = express();
+connectDB();
 
 app.use(cors({
   credentials: true,
 }));
-
+app.use(helmet());
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
+
+// Custom Middleware
+app.use(notFound);
+app.use(errorHandler);
+
+
 const server = http.createServer(app);
 
 server.listen(8080, () => {
+  console.log('***********Database connected************')
   console.log('Server running on http://localhost:8080/');
+  console.log('                                            ')
 });
 
-const MONGO_URL = ''; // DB URI
 
-mongoose.Promise = Promise;
-mongoose.connect(MONGO_URL);
-mongoose.connection.on('error', (error: Error) => console.log(error));
 
 app.use('/', router());

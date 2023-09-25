@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getUserByEmail, createUser } from '../db/users';
+import { getUserByEmail, createUser } from '../models/users';
 import { authentication, random } from '../helpers';
 
 export const login = async (req: express.Request, res: express.Response) => {
@@ -18,7 +18,7 @@ export const login = async (req: express.Request, res: express.Response) => {
     }
 
     const expectedHash = authentication(user.authentication.salt, password);
-    
+
     if (user.authentication.password != expectedHash) {
       return res.sendStatus(403);
     }
@@ -46,7 +46,7 @@ export const register = async (req: express.Request, res: express.Response) => {
     }
 
     const existingUser = await getUserByEmail(email);
-  
+
     if (existingUser) {
       return res.sendStatus(400);
     }
